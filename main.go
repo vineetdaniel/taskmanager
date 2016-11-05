@@ -5,13 +5,14 @@ import (
 	"net/http"
 
 	"github.com/codegangsta/negroni"
-	"github.com/vineetdaniel/taskmanager/common"
+	_ "github.com/vineetdaniel/taskmanager/common"
+	"github.com/vineetdaniel/taskmanager/routers"
 )
 
 func main() {
 	common.Startup()
 
-	router := router.InitRoutes()
+	router := routers.InitRoutes()
 
 	n := negroni.Classic()
 	n.UseHandler(router)

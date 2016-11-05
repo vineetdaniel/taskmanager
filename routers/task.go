@@ -4,7 +4,7 @@ import (
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/vineetdaniel/taskmanager/common"
-	"githubc.com/vineetdaniel/taskmanager/controllers"
+	"github.com/vineetdaniel/taskmanager/controllers"
 )
 
 func SetTaskRoutes(router *mux.Router) *mux.Router {
