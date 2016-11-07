@@ -3,7 +3,7 @@ package routers
 import "github.com/gorilla/mux"
 
 func SetTaskRoutes(router *mux.Router) *mux.Router {
-	//taskRouter := mux.NewRouter()
+	// taskRouter := mux.NewRouter()
 	// taskRouter.HandleFunc("/tasks", controllers.CreateTask).Methods("POST")
 	// taskRouter.HandleFunc("/tasks/{id}", controllers.UpdateTask).Methods("PUT")
 	// taskRouter.HandleFunc("/tasks", controllers.GetTasks).Methods("GET")

@@ -2,7 +2,7 @@ package routers
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/vineetdaniel/taskmanager/controllers"
+	"github.com/vineetdaniel/AiOps/apiv1/controllers"
 )
 
 // SetUserRouters function receives a pointer to the Gorilla mux router object

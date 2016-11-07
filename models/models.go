@@ -16,13 +16,13 @@ type (
 		HashPassword []byte        `json:"hashpassword,omitempty"`
 	}
 
-	Task struct {
+	Url struct {
 		Id          bson.ObjectId `bson:"_id,omitempty" json:"id"`
 		CreatedBy   string        `json:"createdby"`
 		Name        string        `json:"name"`
 		Description string        `json:"description"`
 		CreatedOn   time.Time     `json:"createdon,omitempty"`
-		Due         time.Time     `json:"due,omitempty"`
+		Interval    int           `json:"interval,omitempty"`
 		Status      string        `json:"status,omitempty"`
 		Tags        []string      `json:"tags,omitempty"`
 	}

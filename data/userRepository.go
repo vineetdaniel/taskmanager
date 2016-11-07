@@ -1,7 +1,7 @@
 package data
 
 import (
-	"github.com/vineetdaniel/taskmanager/models"
+	"github.com/vineetdaniel/AiOps/apiv1/models"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"

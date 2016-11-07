@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/vineetdaniel/taskmanager/models"
+	"github.com/vineetdaniel/AiOps/apiv1/models"
 )
 
 type (
@@ -32,5 +32,16 @@ type (
 	AuthUserModel struct {
 		User  models.User `json:"user"`
 		Token string      `json:"token"`
+	}
+)
+
+type (
+	//for Post/Put
+	UrlResource struct {
+		Data models.Url `json:"data"`
+	}
+	//for GET
+	UrlsResource struct {
+		Data []models.Url `json:"data"`
 	}
 )

@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/codegangsta/negroni"
-	"github.com/vineetdaniel/taskmanager/common"
-	"github.com/vineetdaniel/taskmanager/routers"
+	"github.com/vineetdaniel/AiOps/apiv1/common"
+	"github.com/vineetdaniel/AiOps/apiv1/routers"
 )
 
 func main() {
@@ -18,7 +18,7 @@ func main() {
 	n.UseHandler(router)
 
 	server := &http.Server{
-		Addr:    "127.0.0.1:8088",
+		Addr:    common.AppConfig.Server,
 		Handler: n,
 	}
 	log.Println("Listening....", common.AppConfig.Server)

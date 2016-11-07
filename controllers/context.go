@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/vineetdaniel/taskmanager/common"
+	"github.com/vineetdaniel/AiOps/apiv1/common"
 	"gopkg.in/mgo.v2"
 )
 

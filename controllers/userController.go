@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/vineetdaniel/taskmanager/common"
-	"github.com/vineetdaniel/taskmanager/data"
-	"github.com/vineetdaniel/taskmanager/models"
+	"github.com/vineetdaniel/AiOps/apiv1/common"
+	"github.com/vineetdaniel/AiOps/apiv1/data"
+	"github.com/vineetdaniel/AiOps/apiv1/models"
 )
 
 // Register add a new User document
