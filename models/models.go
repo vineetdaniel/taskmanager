@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"gopkg.in/mgo.V2/bson"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type (
@@ -13,7 +13,7 @@ type (
 		LastName     string        `json:"lastname"`
 		Email        string        `json:"email"`
 		Password     string        `json:"password,omitempty"`
-		HassPassword []byte        `json:"hashpassword,omitempty"`
+		HashPassword []byte        `json:"hashpassword,omitempty"`
 	}
 
 	Task struct {

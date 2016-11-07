@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"gopkg.in/mgo.v2"
 	"github.com/vineetdaniel/taskmanager/common"
+	"gopkg.in/mgo.v2"
 )
 
 //Struct used for maintiaing HTTP Request Context
@@ -16,10 +16,10 @@ func (c *Context) Close() {
 	c.MongoSession.Close()
 }
 
-Return mgo collection for the given name
+//Return mgo collection for the given name
 
 func (c *Context) DbCollection(name string) *mgo.Collection {
-	return c.MongoSession.DB(common.AppConfig.Database).C(name)
+	return c.MongoSession.DB("taskdb").C(name)
 }
 
 //Create a new Context object for each HTTP request
@@ -31,4 +31,3 @@ func NewContext() *Context {
 	}
 	return context
 }
-

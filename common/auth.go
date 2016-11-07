@@ -1,22 +1,17 @@
 package common
 
 import (
+	"crypto/rsa"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
-)
-
-const (
-	privKeyPath = "keys/app.rsa"
-	pubKeyPath  = "keys/app.rsa.pub"
-)
-
-var (
-	verifyKey, signKey []byte
+	"github.com/gorilla/context"
 )
 
 // AppClaims provides custom claim for JWT
@@ -26,98 +21,136 @@ type AppClaims struct {
 	jwt.StandardClaims
 }
 
-//Read the key files before starting http handlers
+// using asymmetric crypto/RSA keys
+// location of private/public key files
+const (
+	// openssl genrsa -out app.rsa 1024
+	privKeyPath = "keys/app.rsa"
+	// openssl rsa -in app.rsa -pubout > app.rsa.pub
+	pubKeyPath = "keys/app.rsa.pub"
+)
 
+// Private key for signing and public key for verification
+var (
+	//verifyKey, signKey []byte
+	verifyKey *rsa.PublicKey
+	signKey   *rsa.PrivateKey
+)
+
+// Read the key files before starting http handlers
 func initKeys() {
-	var err error
 
-	signKey, err = ioutil.ReadFile(privKeyPath)
-	log.Println(signKey)
+	signBytes, err := ioutil.ReadFile(privKeyPath)
+	//log.Println(signBytes)
 	if err != nil {
-		log.Fatalf("[initkeys]: %s\n", err)
+		log.Fatalf("[initKeys]: %s\n", err)
 	}
-	verifyKey, err := ioutil.ReadFile(pubKeyPath)
-	log.Println(verifyKey)
+
+	signKey, err = jwt.ParseRSAPrivateKeyFromPEM(signBytes)
+	//log.Println(signKey)
 	if err != nil {
-		log.Fatalf("[verifyKey]: %s\n", err)
+		log.Fatalf("[initKeys]: %s\n", err)
+	}
+
+	verifyBytes, err := ioutil.ReadFile(pubKeyPath)
+	if err != nil {
+		log.Fatalf("[initKeys]: %s\n", err)
+	}
+
+	verifyKey, err = jwt.ParseRSAPublicKeyFromPEM(verifyBytes)
+	if err != nil {
+		log.Fatalf("[initKeys]: %s\n", err)
 	}
 }
 
-//generate JWT token
-
+// GenerateJWT generates a new JWT token
 func GenerateJWT(name, role string) (string, error) {
-	//create a signer for rsa 256
-
-	//t := jwt.New(jwt.GetSigningMethod("RS256"))
-	//set claims for JWT token
-
-	//t.Claims["iss"] = "admin"
-	t := jwt.New(jwt.SigningMethodRS512)
-	claims := make(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(time.Minute * 20).Unix()
-	claims["iat"] = time.Now().Unix()
-	t.Claims = claims
-	//t.Claims["UserInfo"] = struct {
-	//	Name string
-	//	Role string
-	//}{name, role}
-
-	// set the expire time for JWT token
-	//t.Claims["exp"] = time.Now().Add(time.Minute * 20).Unix()
-	tokenString, err := t.SignedString(signKey)
+	// Create the Claims
+	claims := AppClaims{
+		name,
+		role,
+		jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Minute * 20).Unix(),
+			Issuer:    "admin",
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	//log.Println(signKey)
+	ss, err := token.SignedString(signKey)
 	if err != nil {
 		return "", err
 	}
-	return tokenString, nil
+
+	return ss, nil
 }
 
-//Middleware for validating JWT token
-
+// Authorize Middleware for validating JWT tokens
 func Authorize(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	//validate the token
 
+	// Get token from request
 	token, err := request.ParseFromRequestWithClaims(r, request.OAuth2Extractor, &AppClaims{}, func(token *jwt.Token) (interface{}, error) {
-		//verify the token with public key, which is the counter part of the private key
+		// since we only use the one private key to sign the tokens,
+		// we also only use its public counter part to verify
 		return verifyKey, nil
 	})
 
 	if err != nil {
 		switch err.(type) {
-		case *jwt.ValidationError: //JWT validation error
+
+		case *jwt.ValidationError: // JWT validation error
 			vErr := err.(*jwt.ValidationError)
 
 			switch vErr.Errors {
-			case jwt.ValidationErrorExpired:
+			case jwt.ValidationErrorExpired: //JWT expired
 				DisplayAppError(
 					w,
 					err,
-					"Access token is expired",
+					"Access Token is expired, get a new Token",
 					401,
 				)
 				return
+
 			default:
 				DisplayAppError(w,
 					err,
-					"Error while parsing the token",
+					"Error while parsing the Access Token!",
 					500,
 				)
 				return
 			}
+
 		default:
 			DisplayAppError(w,
 				err,
-				"Error while parsing Access Token",
+				"Error while parsing Access Token!",
 				500)
 			return
 		}
+
 	}
 	if token.Valid {
+		// Set user name to HTTP context
+		context.Set(r, "user", token.Claims.(*AppClaims).UserName)
 		next(w, r)
 	} else {
-		DisplayAppError(w,
+		DisplayAppError(
+			w,
 			err,
-			"invalid Access Token",
+			"Invalid Access Token",
 			401,
 		)
 	}
+}
+
+// TokenFromAuthHeader is a "TokenExtractor" that takes a given request and extracts
+// the JWT token from the Authorization header.
+func TokenFromAuthHeader(r *http.Request) (string, error) {
+	// Look for an Authorization header
+	if ah := r.Header.Get("Authorization"); ah != "" {
+		// Should be a bearer token
+		if len(ah) > 6 && strings.ToUpper(ah[0:6]) == "BEARER" {
+			return ah[7:], nil
+		}
+	}
+	return "", errors.New("No token in the HTTP request")
 }
